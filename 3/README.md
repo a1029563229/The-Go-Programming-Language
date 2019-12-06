@@ -69,3 +69,29 @@ fmt.Printf("%d %[1]x %#[1]x %#[1]X\n", x)
 1110xxxx 10xxxxxx 10xxxxxx 2048 ~ 65535 少于 2048 个未使用的值
 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx 65536 ~ 0x10ffff 其他未使用的值
 ```
+
+- Go 的源文件总是以 UTF-8 编码。
+- 如果我们真的要逐个逐个处理 Unicode 字符，则必须使用其他编码机制。下面的例子说明了该字符串的内存布局。它含有 13 个字节，而按作 UTF-8 解读，本质是 9 个码点或文字符号的编码：
+
+```go
+import "unicode/utf8"
+
+s := "Hello, 世界"
+fmt.Println(len(s)) // 13
+fmt.Println(utf8.RuneCountInString(s)) // 9
+```
+
+- Go 的 range 循环也适用于字符串，内部按照 UTF-8 隐式解码；
+- 若将一个整数值转换为字符串，其值按文字符号类型解读，并且产生代表该文字符号值的 UTF-8 码：
+
+```go
+fmt.Println(string(65)) // "A"，而不是 "65"
+fmt.Println(string(0x4eac)) // "京"
+```
+
+## 字符串和字节 slice
+
+- 4 个标准包对字符串操作特别重要：bytes、strings、strconv 和 unicode。
+- strings 包提供了许多函数，用于搜索、替换、比较、修整、切片与连接字符串；
+- bytes 包也有类似的函数，用于操作字节 slice（[]byte 类型，其某些属性和字符串相同）；
+- strconv 包具备的函数，主要用于转换布尔值、整数、浮点数为与之对应的字符串形式，或者把字符串转换为布尔值、整数、浮点数，另外还有为字符串添加/去除引号的函数。
