@@ -39,3 +39,5 @@ go func() {
   close(squares)
 }()
 ```
+
+- 你并不需要在结束时关闭所有的 channel，只需要在告知 goroutine 数据已经全部发送完成时关闭 channel 即可；
