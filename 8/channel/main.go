@@ -1,15 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func run(c chan<- bool) {
-	close(c)
+	time.Sleep(1 * time.Second)
+	c <- true
 	fmt.Println("run")
 }
 
 func main() {
 	c := make(chan bool)
 	go run(c)
-	fmt.Println(<-c)
+	select {
+	case <-c:
+		fmt.Println("do something")
+	}
+
 	fmt.Println("over")
 }
