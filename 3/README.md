@@ -96,3 +96,35 @@ fmt.Println(string(0x4eac)) // "京"
 - bytes 包也有类似的函数，用于操作字节 slice（[]byte 类型，其某些属性和字符串相同）；
 - strconv 包具备的函数，主要用于转换布尔值、整数、浮点数为与之对应的字符串形式，或者把字符串转换为布尔值、整数、浮点数，另外还有为字符串添加/去除引号的函数。
 - unicode 包备有判别文字符号值特性的函数，如 IsDigit、IsLetter、IsUpper 和 IsLower。每个函数以单个文字符号值作为参数，并返回布尔值。
+- 字符串可以和字节 slice 相互转换：
+
+```go
+s := "abc"
+b := []byte(s)
+s2 := string(b)
+```
+
+- 字符串和数字的相互转换
+
+```go
+// 要将整数转换成字符串，一种选择是使用 fmt.Sprintf，另一种做法是用函数 strconv.Itoa ("integer to ASCII")
+x := 123
+y := fmt.Sprintf("%d", x)
+fmt.Println(y, strconv.Itoa(x))
+
+// FormatInt 和 FormatUnit 可以按不同的进位制格式化数字：
+fmt.Println(strconv.FormatInt(int64(x), 2)) // "1111011"
+
+// fmt.Printf 里的谓词 %b、%d、%o 和 %x 往往比 Format 函数方便，若要包含数字以外的附加信息，它就尤其有用：
+s ：= fmt.Sprintf("x=%b", x) // "x=1111011"
+
+// strconv 包内的 Atoi 函数或 ParseInt 函数用于解释表示整数的字符串，而 ParseUint 用于无符号整数：
+// ParseInt 的第三个参数指定结果必须匹配何种大小的整型；例如，16 表示 int16，0 作为特殊值表示 int。任何情况下，结果 y 的类型总是 int64，可将他另外转换成较小的类型。
+x, err := strconv.Atoi("123") // x 是整型
+y, err := strconv.ParseInt("123", 10, 64)
+```
+
+## 常量
+
+- 常量是一种表达式，其可以保证在编译阶段就计算出表达式的值，并不需要等到运行时，从而使编译器得以知晓其值。所有常量本质上都属于基本类型：布尔型、字符串或数字。
+- 常量的声明可以使用常量生成器 iota，它创建一系列相关值，而不是逐个值显式写出。常量声明中，iota 从 0 开始取值，逐项加 1。
