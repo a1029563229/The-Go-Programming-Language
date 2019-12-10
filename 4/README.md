@@ -157,5 +157,9 @@ fmt.Printf("%s\n", data)
 - marshal 的逆操作将 JSON 字符串解码为 Go 数据结构，这个过程叫做 unmarshal，这个是由 json.Unmarshal 实现的。
 
 ```go
-
+var titles []struct{ Title string }
+if err := json.Unmarshal(data, &titles); err != nil {
+  log.Fatalf("JSON unmarshaling failed: %s", err)
+}
+fmt.Println(titles)
 ```
