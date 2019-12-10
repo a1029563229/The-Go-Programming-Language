@@ -62,4 +62,100 @@ func appendInt(x []int, y int) []int {
 - 和 slice 一样，map 不可比较，唯一合法的比较就是和 nil 做比较。为了判断两个 map 是否拥有相同的键和值，必须写一个循环：
 
 ```go
+func equal(x, y map[string]int) bool {
+  if len(x) != len(y) {
+    return false
+  }
+  for k, xv := range x {
+    if yv, ok := y[k]; !ok || yv != xv {
+      return false
+    }
+  }
+  return true
+}
+```
+
+## 结构体
+
+- 结构体是将零个或者多个任意类型的命名变量组合在一起的聚合数据类型。
+- 命名结构体类型 S 不可以定义一个拥有相同结构体类型 S 的成员变量，但是 S 中可以定义一个 S 的指针类型，即 *S，这样我们就可以创建一些递归数据结构，比如链表和树。
+- 没有任何成员变量的结构体称为空结构体，写作 struct{}。它没有长度，也不携带任何信息，但是有的时候会很有用。
+- 结构体类型的值可以作为参数传递给函数或者作为函数的返回值，出于效率的考虑，大型的结构体通常都使用结构体指针的方式直接传递给函数或者从函数中返回。
+
+```go
+func Bonus(e *Employee, percent int) int {
+  return e.Salary * percent / 100
+}
+```
+
+- 由于通常结构体都通过指针的方式使用，因此可以使用一种简单的方式来创建、初始化一个 struct 类型的变量并获取它的地址：
+
+```go
+pp := &Point{1, 2}
+```
+
+- 结构体比较
+- 如果结构体的所有成员变量都可以比较，那么这个结构体就是可比较的。两个结构体的比较可以使用 == 或者 !=。
+- 和其他可比较的类型一样，可比较的结构体类型都可以作为 map 的键类型。
+
+- 结构体嵌套和匿名成员
+
+```go
+// Go 允许我们定义不带名称的结构体成员，只需要指定类型即可；这种结构体成员称做匿名成员。这个结构体成员的类型必须是一个命名类型或者指向命名类型的指针
+type Point {
+  x, y int
+}
+
+type Circle struct {
+  Point
+  Radius int
+}
+
+type Wheel struct {
+  Circle
+  Spokes int
+}
+
+var w Wheel
+w.X = 8 // 等价于 w.Circle.Point.X = 8
+w.Y = 8 // 等价于 w.Circle.Point.Y = 8
+w.Radius = 5 // 等价于 w.Circle.Radius = 5
+w.Spokes = 20
+
+// 结构体字面量必须遵循形状类型的定义，所以我们使用下面的两种形式来初始化：
+w = Wheel{Circle{Point{8, 8}, 5}, 20}
+
+w = Wheel{
+  Circle: Circle{
+    Point: Point{X: 8, Y: 8},
+    Radius: 5,
+  },
+  Spokes: 20,
+}
+```
+
+- 以快捷方式访问匿名变量的内部变量同样适用于访问匿名成员的内部方法。因此，外围的结构体类型获取的不仅是匿名成员的内部变量，还有相关的方法。这个机制就是从简单类型对象组合成复杂的符合类型的主要方式。在 Go 中，组合是面向对象编程方式的核心。
+
+- JSON
+```go
+// 把 Go 的数据结构转换成 JSON 称为 marshal。marshal 是通过 json.Marshal 来实现的：
+data, err := json.Marshal(movies)
+if err != nil {
+  log.Fatalf("JSON marshaling failed: %s", err)
+}
+fmt.Printf("%s\n", data)
+
+// 为了方便阅读，有一个 json.MarshalIndent 的变体可以输出整齐格式化过的结果
+data, err := json.MarshalIndent(movies, "", "  ")
+if err != nil {
+  log.Fatalf("JSON marshaling failed: %s", err)
+}
+fmt.Printf("%s\n", data)
+```
+
+- marshal 使用 Go 结构体成员的名称作为 JSON 对象里面字段的名称（通过反射的方式），只有可导出的成员可以转换成 JSON 字段。
+- marshal 的逆操作将 JSON 字符串解码为 Go 数据结构，这个过程叫做 unmarshal，这个是由 json.Unmarshal 实现的。
+
+```go
+
 ```
