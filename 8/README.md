@@ -183,4 +183,21 @@ func main() {
 
 ## 并行遍历文件夹
 
-- 实现类似于 Unix 系统的 `du` 命令功能；267
+- 实现类似于 Unix 系统的 `du` 命令功能；
+
+## Cancellation
+
+```go
+var done = make(chan struct{})
+
+func canceled() bool {
+  select {
+    case <-done:
+    return true
+    default:
+    return false
+  }
+}
+```
+
+## Chat Server
