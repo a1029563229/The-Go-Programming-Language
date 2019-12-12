@@ -2,25 +2,29 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
-func run(c chan<- bool) {
+func run(id int) {
 	time.Sleep(1 * time.Second)
-	c <- true
-	c <- false
-	fmt.Println("run")
+	fmt.Println("run: ", id)
 }
 
+var singal = make(chan bool, 20)
+
 func main() {
-	c := make(chan bool)
-	go run(c)
-	// <-c
-	<-c
-
-	for v := range c {
-		fmt.Println(v)
+	var wg sync.WaitGroup
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func(i int) {
+			singal <- true
+			defer func() {
+				<-singal
+				wg.Done()
+			}()
+			run(i)
+		}(i)
 	}
-
-	fmt.Println("over")
+	wg.Wait()
 }
