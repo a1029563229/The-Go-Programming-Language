@@ -23,7 +23,7 @@ func TimeConsuming(tag string) func() {
 	}
 }
 
-// go run main.go www.jd.com
+// go run main.go api.jt-gmall.com
 func main() {
 	ch := make(chan string)
 	for _, link := range os.Args[1:] {

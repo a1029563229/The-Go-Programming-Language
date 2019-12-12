@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-// go run main.go www.baidu.com
+// go run main.go api.jt-gmall.com
 func main() {
 	for _, link := range os.Args[1:] {
 		if !strings.HasPrefix(link, "https://") && !strings.HasPrefix(link, "http://") {

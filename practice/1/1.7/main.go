@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-// go run main.go https://www.baidu.com
+// go run main.go https://api.jt-gmall.com
 func main() {
 	for i, link := range os.Args[1:] {
 		resp, err := http.Get(link)
