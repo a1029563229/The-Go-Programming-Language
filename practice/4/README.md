@@ -1,0 +1,16 @@
+# 复合数据类型 - 练习题
+
+- [4.1：编写一个函数，用于统计 SHA256 散列中不同的位数（见 2.6.2 节的 PopCount）](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.1)
+- [4.2：编写一个程序，用于在默认情况下输出其标准输入的 SHA256 散列，但也支持一个输出 SHA384 或 SHA512 散列的命令行标记](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.2)
+- [4.3：重写函数 reverse，使用数组指针作为参数而不是 slice](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.3)
+- [4.4：编写一个函数 rotate，实现一次遍历就可以完成元素旋转。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.4)
+- [4.5：编写一个就地处理函数，用于去除 []string slice 中相邻的重复字符串元素](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.5)
+- [4.6：编写一个就地处理函数，用于将一个 UTF-8 编码的字节 slice 中所有相邻的 Unicode 空白字符（查看 unicode.IsSpace）缩减为一个 ASCII 空白字符](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.6)
+- [4.7：修改函数 reverse，来翻转一个 UTF-8 编码的字符串中的字符元素，传入参数是该字符串对应的字节 slice 类型（[]byte）。你可以做到不需要重新分配内存就实现该功能吗？](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.7)
+- [4.8：修改 charcount 的代码来统计字母、数字和其他在 Unicode 分类中的字符数量，可以使用 unicode.IsLetter 等](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.8)
+- [4.9：编写一个程序 wordfreq 来汇总输入文本文件中每个单词出现的次数。在第一次调用 Scan 之前，需要使用 input.Split(bufio.ScanWords) 来将文本行按照单词分割是行分割。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.9)
+- [4.10：修改 issues 实例，按照时间来输出结果，比如一个月以内，一年以内或者超过一年](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.10)
+- [4.11：开发一个工具来让用户可以通过命令行创建、读取、更新或者关闭 Github 的 issues，当需要额外输入的时候，调用他们喜欢的文本编辑器。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.11)
+- [4.12：流行的 Web 漫画 xkcd 有一个 JSON 接口。例如，调用 https://xkcd.com/571/info.0.json 输出漫画 571 的详细描述，这个是很多人喜欢的。下载每一个 URL 并且构建一个离线索引。编写一个工具 xdcd 来使用这个索引，可以通过命令行指定搜索条件来查找并输出符合条件的每个漫画的 URL 和剧本。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.12)
+- [4.13：基于 JSON 开发的 Web 服务，开放电影数据库让你可以在 https://omdbapi.com/ 上通过名字来搜索电影并下载海报图片。开发一个 poster 工具以通过命令行指定的电影名称来下载海报。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.13)
+- [4.14：创建一个 Web 服务器，可以通过查询 GitHub 并缓存信息，然后可以浏览 bug 列表、里程碑信息以及参与用户的信息。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.14)
