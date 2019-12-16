@@ -1,6 +1,5 @@
 # 复合数据类型 - 练习题
 
-- [4.1：编写一个函数，用于统计 SHA256 散列中不同的位数（见 2.6.2 节的 PopCount）](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.1)
 - [4.2：编写一个程序，用于在默认情况下输出其标准输入的 SHA256 散列，但也支持一个输出 SHA384 或 SHA512 散列的命令行标记](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.2)
 - [4.3：重写函数 reverse，使用数组指针作为参数而不是 slice](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.3)
 - [4.4：编写一个函数 rotate，实现一次遍历就可以完成元素旋转。](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/practice/4/4.4)
