@@ -1,12 +1,14 @@
 # Go 程序设计
 
 ## 章节
-+ [入门](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/1)
-+ [程序结构](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/2)
-+ [基本数据](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/3)
-+ [复合数据类型](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/4)
-+ [函数](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/5)
-+ [Goroutines and Channels](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/8)
++ [第一章：入门](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/1)
++ [第二章：程序结构](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/2)
++ [第三章：基本数据](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/3)
++ [第四章：复合数据类型](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/4)
++ [第五章：函数](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/5)
++ [第六章：方法](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/5)
++ [第八章：Goroutines and Channels](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/8)
++ [第九章：使用共享变量实现并发](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/9)
 
 ## 练习题全解析
 
