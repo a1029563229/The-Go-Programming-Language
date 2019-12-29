@@ -108,3 +108,144 @@ func main() {
 ```
 
 Web 服务器每次都用一个新的 `goroutine` 来调用处理程序，所以处理程序必须注意并发问题。
+
+## error 接口
+
+`error` 是一个接口类型，包含一个返回错误消息的方法：
+
+```go
+type error interface {
+  Error() string
+}
+```
+
+构造 `error` 最简单的方法是调用 `errors.New`，它会返回一个包含指定的错误消息的新 `error` 实例。完整的 `error` 包只有如下 4 行代码：
+
+```go
+package errors
+
+func New(text string) error { return &errorString{text} }
+
+type errorString struct { text string }
+
+func (e *errorString) Error() string { return e.text }
+```
+
+直接调用 `errors.New` 比较罕见，因为有一个更易用的封装函数 `fmt.Errorf`，它还额外提供了字符串格式化功能：
+
+```go
+package fmt
+
+import "errors"
+
+func Errorf(format string, args ...interface{}) error {
+  return errors.New(Sprintf(format, args...))
+}
+```
+
+## 类型断言
+
+类型断言是一个作用在接口值上的操作，写出来类似于 `x.(T)`，其中 `x` 是一个接口类型的表达式，而 `T` 是一个类型（称为断言类型）。类型断言会检查作为操作数的动态类型是否满足指定的断言类型。
+
+```go
+var w io.Writer = os.Stdout
+f, ok := w.(*os.File) // 成功：ok, f == os.Stdout
+b, ok := w.(*bytes.Buffer) // 失败：!ok, b == nil
+```
+
+通过类型断言来识别错误：
+
+```go
+import (
+  "errors"
+  "syscall"
+)
+var ErrNotExist = errors.New("file does not exist")
+
+func IsNotExist(err error) bool {
+  if pe, ok := err.(*PathError); ok {
+    err = pe.Err
+  }
+  return err == syscall.ENOENT || err == ErrNotExist
+}
+
+// 实际调用
+_, err := os.Open("/no/such/file")
+fmt.Println(os..IsNotExist(err)) // "true"
+```
+
+## 通过接口类型断言来查询特性
+
+```go
+func writeHeader(w io.Writer, contentType string) error {
+  if _, err := w.Write([]byte("Content-type: ")); err != nil {
+    return err
+  }
+}
+```
+
+因为 `Write` 方法需要一个字节 `slice`，而我们想写入的是一个字符串，所以 `[]byte(...)` 转换就是必需的。这种转换需要进行内存分配和内存复制，但复制后的内存又会被马上抛弃。我们能否避开内存分配呢？
+
+```go
+// writeString 将 s 写入 w
+// 如果 w 有 WriteString 方法，那么将直接调用该方法
+func writeString(w io.Writer, s string) (n int, err error) {
+  type stringWriter interface {
+    WriteString(string) (n int, err error)
+  }
+  if sw, ok := w.(stringWriter); ok {
+    return sw.WriteString(s) // 避免了内存复制
+  }
+  return w.Write([]byte(s)) // 分配了临时内存
+}
+
+func writeHeader(w io.Writer, contentType string) error {
+  if _, err := writeString(w, "Content-type: "); err != nil {
+    return err
+  }
+}
+```
+
+这个方法也用在了 `fmt.Printf` 中，用于从通用类型中识别出 `error` 或者 `fmt.Stringer`。在 `fmt.Fprintf` 内部，有一步是把单个操作数转换为一个字符串，如下所示：
+
+```go
+package fmt
+
+func formatOneValue(x interface{}) string {
+  if err, ok := x.(error); ok {
+    return err.Error()
+  }
+  if str, ok := x.(Stringer); ok {
+    return str.String()
+  }
+  // ... 所有其他类型
+}
+```
+
+使用 `type` 关键字进行类型断言：
+
+```go
+func sqlQuote(x interface{}) string {
+  switch x := x.(type) {
+    case nil:
+      return "NULL"
+    case int, uint:
+      return fmt.Sprintf("%d", x) // 这里 x 类型为 interface{}
+    case bool:
+      if x {
+        return "TRUE"
+      }
+      return "FALSE"
+    case string:
+      return sqlQuoteString(x) // （未显示具体代码）
+    default:
+      panic(fmt.Sprintf("unexpected type %T: %v", x, x))
+  }
+}
+```
+
+## 一些建议
+
+当设计一个新包时，一个新手 Go 程序员会首先创建一系列接口，然后再定义满足这些接口的具体类型。这种方式会产生很多接口，但这些接口只有一个单独的实现。不要这样做。这种接口是不必要的抽象，还有运行时的成本。可以用导出机制来限制一个类型的哪些方法或结构体的哪些字段是对包外可见的。仅在有两个或多个具体类型需要按统一的方法处理时才需要接口。
+
+设计新类型时越小的接口越容易满足。一个不错的接口设计经验是仅要求你需要的。
