@@ -1,85 +1,63 @@
-# Concurrency with Shared Variables
+# 使用共享变量实现并发
 
-## Race Conditions
+如果我们无法自信地说一个事件肯定先于另外一个事件，那么这两个事件就是并发的。考虑一个能在串行程序中正确工作的函数。如果这个函数在并发调用时仍然能正确工作，那么这个函数是并发安全的。
 
-- 在普通的单线程项目中，我们的函数都是按顺序执行的；在多线程的项目中，我们无法确保函数的执行顺序；
-- 一个包级别的导出函数应该是并发安全类型的函数，因为一个并发的函数有太多的原因导致它不能正常工作，比如死锁和资源耗尽。我们不可能去逐一处理这些问题，所以我们应该把重点放在 Race Condition 上。
+导出的包级别函数通常可以认为是并发安全的。因为包级别的变量无法限制在一个 `goroutine` 内，所以那些修改这些变量的函数就必须采用互斥机制。
 
-## Lock/Unlock
+竞态是指在多个 `goroutine` 按某些交错顺序执行时程序无法给出正确的结果。数据竞态发生于两个 `goroutine` 并发读写同一个变量并且至少其中一个是写入时。
 
-- 死锁问题
+由于其他 `goroutine` 无法直接访问相关变量，因此它们就必须使用通道来向受限 `goroutine` 发送查询请求或者更新变量。这也是这句 Go 箴言的含义：“不要通过共享内存来通信，而应该通过通信来共享内存”。
+
+## 互斥锁
+
+`sync.Mutex`
+
+互斥锁是不能再入的（无法对一个已经上锁的互斥量再上锁），这样做将会导致死锁。
+
+读写互斥锁：`sync.RWMutex`
+
+读写互斥锁允许只读操作可以并发执行，但写操作需要获得完全独享的访问权限。仅在绝大部分 `goroutine` 都在获取读锁并且锁竞争比较激烈时（即：`goroutine` 一般都需要等待后才能获到锁），`RWMutex` 才有优势。因为 `RWMutex` 需要更复杂的内部工作，所以在竞争不激烈时它比普通的互斥锁慢。
+
+## 内存同步
+
+现代的计算机一般都会有多个处理器，每个处理器多有内存的本地缓存。为了提高效率，对内存的写入是缓存在每个处理器中的，只有在必要时才刷回内存。甚至刷回内存的顺序都可能与 `goroutine` 的写入顺序不一致。像通道通信或者互斥锁操作这样的同步原语都会导致处理器把累积的写操作刷回内存并提交，所以这个时刻之前 `goroutine` 的执行结果就保证了对运行在其他处理器的 `goroutine` 可见。
+
+考虑如下代码片段的可能输出：
 
 ```go
-var (
-	mu      sync.Mutex
-	balance int
-)
-
-func Deposit(amount int) {
-	mu.Lock()
-	defer mu.Unlock()
-	balance += amount
-}
-
-func Balance() int {
-	mu.Lock()
-	defer mu.Unlock()
-	return balance
-}
-
-// 重复调用 mu.Lock() 将导致死锁问题
-func Withdraw(amount int) bool {
-  mu.Lock()
-  defer mu.Unlock()
-  Deposit(-amount)
-  if Balance() < 0 {
-    Deposit(amount)
-    return false // insufficient funds
-  }
-  return true
+var x, y int
+go func() {
+    x = 1
+    fmt.Print("y:", y, " ")
+}()
+go func() {
+    y = 1
+    fmt.Print("x:", x, " ")
 }
 ```
 
-- 解决死锁问题
+程序将会产生如下两个输出
 
 ```go
-// 将问题进行进一步的原子级拆分
-func Withdraw(amount int) bool {
-    mu.Lock()
-    defer mu.Unlock()
-    deposit(-amount)
-    if balance < 0 {
-        deposit(amount)
-        return false // insufficient funds
-    }
-    return true
-}
-
-func Deposit(amount int) {
-    mu.Lock()
-    defer mu.Unlock()
-    deposit(amount)
-}
-
-func Balance() int {
-    mu.Lock()
-    defer mu.Unlock()
-    return balance
-}
-
-// This function requires that the lock be held.
-func deposit(amount int) { balance += amount }
+x:0 y:0
+y:0 x:0
 ```
 
-## 读写锁
+在某些特定的编译器、CPU 或其他情况下，这些确实可能发生。在单个 `goroutine` 内，每个语句的效果保证按照执行的顺序发生，也就是说，`goroutine` 是串行一致的。但在缺乏使用通道或者互斥量来显式同步的情况下，并不能保证所有的 `goroutine` 看到的事件顺序都是一致的。如果两个 `goroutine` 在不同的 CPU 上执行，每个 CPU 都有自己的缓存，那么一个 `goroutine` 的写入操作再同步到内存之前对另外一个 `goroutine` 的 `Print` 语句是不可见的。
 
-- 读的操作
+## 延迟初始化：sync.Once
+
+`sync.Once` 包含一个布尔变量和一个互斥量，布尔变量记录初始化是否已经完成，互斥量则保护这个布尔变量和客户端的数据结构。`Once` 的唯一方法 `Do` 以初始化函数作为它的参数。
+
 ```go
-var mu sync.RWMutex
-var balance int
-func Balance() int {
-    mu.RLock() // readers lock
-    defer mu.RUnlock()
-    return balance
+var loadIconsOnce sync.Once
+var icons map[string]image.Image
+
+// 并发安全
+func Icon(name string) image.Image {
+    loadIconsOnce.Do(loadIcons)
+    return icons[name]
 }
 ```
+
+每次调用 `Do（loadIcons)` 时会先锁定互斥量并检查里面的布尔变量。在第一次调用时，这个布尔变量为假，`Do` 会调用 `loadIcons` 然后把变量设置为真。后续的调用相当于空操作，只是通过互斥量的同步来保证 `loadIcons` 对内存产生的效果对所有的 `goroutine` 可见。以这种方式来使用 `sync.Once`，可以避免变量在正确狗仔之前就被其他 `goroutine` 分享。

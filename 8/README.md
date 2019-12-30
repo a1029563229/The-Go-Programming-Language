@@ -2,9 +2,11 @@
 
 ## Goroutines
 
-- 在 Go 中，每个并行的线程被称为 goroutines；
-- 一个 Goroutines 可以简单想象成系统中的一个线程。
-- 当一个项目启动时，只有一个 goruntine，那就是主线程（main function），你可以用 `go` 关键字来启动一个新的线程，就像下面这个例子：
+在 Go 中，每个并行的线程被称为 goroutines；
+
+一个 Goroutines 可以简单想象成系统中的一个线程。(goroutine 和线程之间在数量上有非常大的差别)
+
+当一个项目启动时，只有一个 goruntine，那就是主线程（main function），你可以用 `go` 关键字来启动一个新的线程，就像下面这个例子：
 
 ```go
 f() // 执行函数，等待执行结果的返回
@@ -16,17 +18,17 @@ go f() // 启动新的进程执行函数，不会等待执行结果的返回
 
 ## Channels
 
-- 无缓冲区 channel
-  - 当某个 goroutines 的 channel 发送了一个值后，如果没有对应的接收操作，那这个 goroutines 会处于 pending 状态，直到有对应的 channel 接收了发送的值；反之也是一样，如果在某个 goroutines 进行了一个 channel 的接收操作后，如果没有接收到对应 channel 发送的值，这个 goroutines 也会处于 Pending 状态，直到接收到 channel 的值；
-  - 使用无缓冲区 channel 进行通信可以使得在 goroutines 的发送和接收操作变成同步，所以无缓冲区 channels 有时候也叫做同步 channels。
+无缓冲区 channel
+- 当某个 goroutines 的 channel 发送了一个值后，如果没有对应的接收操作，那这个 goroutines 会处于 pending 状态，直到有对应的 channel 接收了发送的值；反之也是一样，如果在某个 goroutines 进行了一个 channel 的接收操作后，如果没有接收到对应 channel 发送的值，这个 goroutines 也会处于 Pending 状态，直到接收到 channel 的值；
+- 使用无缓冲区 channel 进行通信可以使得在 goroutines 的发送和接收操作变成同步，所以无缓冲区 channels 有时候也叫做同步 channels。
 
-- Pipelines
-  - channels 也可以用将输出变为输入的形式连接几个 goroutines，这种模式称作 Pipelines。
+channels 也可以用将输出变为输入的形式连接几个 goroutines，这种模式称作 Pipelines。
 
 ![pipelines](http://shadows-mall.oss-cn-shenzhen.aliyuncs.com/images/blogs/other/Jietu20191206-173550.png)
 
-- 使用 close 关闭 channel 时，所有的发送操作都会引起 panic，但是接收操作会接收到一个对应类型的零值。
-- 检测 channel 是否关闭的方法：
+如果发送方知道没有更多的数据要发送，告诉接收者所在 `goroutine` 可以停止等待是很有用的。这额可以通过调用内置的 `close` 函数来关闭通道。在通道关闭后，任何后续的发送操作将会导致应用崩溃。当关闭的通道被读完（就是最后一个发送的值被接收）后，所有后续接收操作顺畅进行，只是获取到的是零值。
+
+检测 channel 是否关闭的方法：
 ```go
 go func() {
   for {
@@ -120,6 +122,8 @@ func makeThumbnails6(filenames <-chan string) int64 {
 
 ## 并发爬虫案例
 
+无限制的并行通常不是一个好的主意，因为系统中总有限制因素，例如，对于计算下应用 CPU 的核数，对于磁盘 I/O 操作磁头和磁盘的个数，下载流所使用的网络带宽，或者 Web 服务本身的容量。解决办法是根据资源可用情况限制并发的个数，以匹配合适的并行度。
+
 ```go
 func main() {
   worklist := make(chan []string)
@@ -178,8 +182,13 @@ func main() {
 
 ## Multiplexing with select
 
-- select 可以同时接收多个 channel 的值；
-- 如果我们希望在一个还没有准备好的 channel 中接收值并且不想发生堵塞时，我们可以使用 select 来避免堵塞；
+`select` 一直等待，直到一次通信来告知有一些情况可以执行。然后，它进行这次通信，执行此情况对应的语句；其他的通信将不会发生。对于没有对应情况的 `select`，`select{}` 将永远等待。
+
+如果多个情况同时满足，`select` 随机选择一个，这样保证每一个通道有相同的机会被选中。
+
+select 可以同时接收多个 channel 的值；
+
+如果我们希望在一个还没有准备好的 channel 中接收值并且不想发生堵塞时，我们可以使用 select 来避免堵塞；
 
 ## 并行遍历文件夹
 
