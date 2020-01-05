@@ -10,7 +10,9 @@
 + [第七章：接口](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/7)
 + [第八章：Goroutines and Channels](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/8)
 + [第九章：使用共享变量实现并发](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/9)
-+ [第九章：包和 go 工具](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/10)
++ [第十章：包和 go 工具](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/10)
++ [第十一章：测试](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/11)
++ [第十二章：反射](https://github.com/a1029563229/The-Go-Programming-Language/tree/master/12)
 
 ## 练习题全解析
 
