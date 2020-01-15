@@ -52,3 +52,24 @@ func main() {
 	fmt.Println(Any([]time.Duration{d})) // []time.Duration 0xc00009a028
 }
 ```
+
+## 使用 reflect.Value 来设置值
+
+可以通过变量的 `CanAddr` 方法来询问 `reflect.Value` 变量是否可寻址。
+
+从一个可寻址的 `reflect.Value()` 获取变量需要三步。首先，调用 `Addr()`，返回一个 `Value`，其中包含一个指向变量的指针，接下来，在这个 `Value` 上调用 `Interface()`，会返回一个包含这个指针的 `interface{}` 值。最后，如果我们知道变量的类型，我们可以使用类型断言来把接口内容转换成一个普通指针。之后就可以通过这个指针来更新变量了：
+
+```go
+x := 2
+d := reflect.ValueOf(&x).Elem() // d 代表变量 x
+px := d.Addr().Interface().(*int) // px := &x
+*px = 3 // x = 3
+fmt.Println(x) // "3"
+```
+
+还可以直接通过可寻址的 `reflect.Value` 来更新变量，不用通过指针，而是直接调用 `reflect.Value.Set` 方法：
+
+```go
+d.Set(reflect.ValueOf(4))
+fmt.Println(x) // "4"
+```
